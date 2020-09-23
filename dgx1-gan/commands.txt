@@ -1,3 +1,0 @@
-docker build -t gan .
-docker run -d -p 80:80 --name gan -P -v /home/ignacio/Proyectos/UOH/InitialSteps/GAN/out:/app/data gan
-docker logs gan
