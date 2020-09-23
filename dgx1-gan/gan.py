@@ -7,8 +7,10 @@ import keras.backend as K
 import matplotlib.pyplot as plt
 import numpy as np
 import os
-#from PIL import Image
 
+from os import listdir
+from os.path import isfile, join
+import imageio
 
 def sampling(args):
     z_mean, z_log_var = args
@@ -104,6 +106,15 @@ def train(epochs, batch_size=128, sample_interval=50):
             # save generated image samples
             sample_images(epoch)
 
+    files = [f for f in listdir('data/') if isfile(join('data/', f))]
+    images = []
+    for filename in files:
+        images.append(imageio.imread('data/' + filename))
+    imageio.mimsave('data/mnist.gif', images)
+
+
+
+
 # Save generated images per specified epochs 
 def sample_images(epoch):
     r, c = 5, 5
@@ -125,53 +136,53 @@ def sample_images(epoch):
 
 if __name__ == "__main__":
 
-	print('Set up network parameters')
+    print('Set up network parameters')
 
-	img_rows = 28
-	img_cols = 28
-	channels = 1
-	img_shape = (img_rows, img_cols, channels)
-	latent_dim = 10
-	batch_size = 16
-	epsilon_std = 1.0
+    img_rows = 28
+    img_cols = 28
+    channels = 1
+    img_shape = (img_rows, img_cols, channels)
+    latent_dim = 10
+    batch_size = 16
+    epsilon_std = 1.0
 
-	print('Build GAN')
+    print('Build GAN')
 
-	optimizer = Adam(0.0002, 0.5)
+    optimizer = Adam(0.0002, 0.5)
 
-	# Build and compile the discriminator
-	discriminator = build_discriminator()
-	discriminator.compile(loss='binary_crossentropy',
-	                      optimizer=optimizer,
-	                      metrics=['accuracy'])
+    # Build and compile the discriminator
+    discriminator = build_discriminator()
+    discriminator.compile(loss='binary_crossentropy',
+                          optimizer=optimizer,
+                          metrics=['accuracy'])
 
-	# Build the encoder / decoder
-	encoder = build_encoder()
-	decoder = build_decoder()
+    # Build the encoder / decoder
+    encoder = build_encoder()
+    decoder = build_decoder()
 
-	img = Input(shape=img_shape)
-	# The generator takes the image, encodes it and reconstructs it
-	# from the encoding
-	encoded_repr = encoder(img)
-	reconstructed_img = decoder(encoded_repr)
+    img = Input(shape=img_shape)
+    # The generator takes the image, encodes it and reconstructs it
+    # from the encoding
+    encoded_repr = encoder(img)
+    reconstructed_img = decoder(encoded_repr)
 
-	# For the adversarial_autoencoder model we will only train the generator
-	# if discriminator is attached to generator, set this flag to fix discriminator
-	discriminator.trainable = False
+    # For the adversarial_autoencoder model we will only train the generator
+    # if discriminator is attached to generator, set this flag to fix discriminator
+    discriminator.trainable = False
 
-	# The discriminator determines validity of the encoding
-	validity = discriminator(encoded_repr)
+    # The discriminator determines validity of the encoding
+    validity = discriminator(encoded_repr)
 
-	# The adversarial_autoencoder model  (stacked generator and discriminator)
-	adversarial_autoencoder = Model(img, [reconstructed_img, validity])
-	adversarial_autoencoder.compile(loss=['mse', 'binary_crossentropy'], loss_weights=[0.999, 0.001], optimizer=optimizer)
+    # The adversarial_autoencoder model  (stacked generator and discriminator)
+    adversarial_autoencoder = Model(img, [reconstructed_img, validity])
+    adversarial_autoencoder.compile(loss=['mse', 'binary_crossentropy'], loss_weights=[0.999, 0.001], optimizer=optimizer)
 
-	print('Train GAN')
+    print('Train GAN')
 
-	epochs = 100000 #2000
-	sample_interval = 200
-	sample_count = epochs/sample_interval
+    epochs = 2000 #2000
+    sample_interval = 200 #200
+    sample_count = epochs/sample_interval
 
-	print('epochs: ', epochs)
+    print('epochs: ', epochs)
 
-	train(epochs=epochs, batch_size=batch_size, sample_interval=sample_interval)
+    train(epochs=epochs, batch_size=batch_size, sample_interval=sample_interval)
