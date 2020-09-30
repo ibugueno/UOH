@@ -1,3 +1,4 @@
+from numba import jit, cuda
 from keras.datasets import mnist
 from keras.layers import Input, Dense, Reshape, Flatten, Lambda
 from keras.layers.advanced_activations import LeakyReLU
@@ -12,13 +13,15 @@ from os import listdir
 from os.path import isfile, join
 import imageio
 
+@jit(target ="cuda")
 def sampling(args):
     z_mean, z_log_var = args
     epsilon = K.random_normal(shape=(batch_size, latent_dim), mean=0., stddev=epsilon_std)
     return z_mean + K.exp(z_log_var / 2) * epsilon
 
-#Define a function to build an encoder
 
+#Define a function to build an encoder 
+@jit(target ="cuda")
 def build_encoder():
     img = Input(shape=img_shape)
     h = Flatten()(img)
@@ -32,7 +35,7 @@ def build_encoder():
     return Model(img, z)
 
 #Define a function to build an decoder
-
+@jit(target ="cuda")
 def build_decoder():
     model = Sequential()
     model.add(Dense(512, input_dim=latent_dim))
@@ -49,7 +52,7 @@ def build_decoder():
 
 
 #Define a function to build an discriminator
-
+@jit(target ="cuda")
 def build_discriminator():
     model = Sequential()
     model.add(Dense(512, input_dim=latent_dim))
@@ -64,7 +67,7 @@ def build_discriminator():
 
 
 #Define a function to train GAN
-
+@jit(target ="cuda")
 def train(epochs, batch_size=128, sample_interval=50):
     # Load the dataset
     (X_train, _), (_, _) = mnist.load_data()
@@ -116,6 +119,7 @@ def train(epochs, batch_size=128, sample_interval=50):
 
 
 # Save generated images per specified epochs 
+@jit(target ="cuda")
 def sample_images(epoch):
     r, c = 5, 5
     z = np.random.normal(size=(r * c, latent_dim))
