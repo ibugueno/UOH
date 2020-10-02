@@ -1,3 +1,6 @@
+FROM nvidia/cuda:10.1-base
+CMD nvidia-smi
+
 # Use an official tensorflow runtime as a parent image :1.15.2
 FROM tensorflow/tensorflow
 

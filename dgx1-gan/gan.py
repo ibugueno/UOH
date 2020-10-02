@@ -136,7 +136,7 @@ def sample_images(epoch):
 
 if __name__ == "__main__":
 
-    config = tf.compat.v1.ConfigProto( device_count = {'GPU': 1 , 'CPU': 1} ) 
+    config = tf.compat.v1.ConfigProto( device_count = {'GPU': 1} ) 
     sess = tf.compat.v1.Session(config=config) 
     tf.compat.v1.keras.backend.set_session(sess)
 
